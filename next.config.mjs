@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
+  allowedDevOrigins: [process.env.REPLIT_DEV_DOMAIN].filter(Boolean),
 };
 
 export default nextConfig;

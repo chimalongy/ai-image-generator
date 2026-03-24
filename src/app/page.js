@@ -13,15 +13,11 @@ export default function AIPromptPage() {
     setResponse("");
 
     try {
-      // POST request to your Cloudflare Worker
-      const res = await fetch(
-        "https://image-gen-worker.geniusdomainnames.workers.dev/ask",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt }), // send the prompt in JSON body
-        }
-      );
+      const res = await fetch("/api/generate-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
 
       const data = await res.json();
 
