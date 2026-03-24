@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 const MODEL_SIZE_CONFIG = {
   "@cf/black-forest-labs/flux-1-schnell": {
@@ -8,90 +8,106 @@ const MODEL_SIZE_CONFIG = {
   },
   "@cf/black-forest-labs/flux-2-klein-4b": {
     supportsSize: true, min: 256, max: 1920,
+    supportsRefImage: true,
+    refImageNote: "Optional: upload up to 4 reference images (≤512×512 each) to guide style/content",
     presets: [
       { label: "Square HD — 1024×1024", width: 1024, height: 1024 },
-      { label: "Landscape — 1280×768", width: 1280, height: 768 },
-      { label: "Portrait — 768×1280", width: 768, height: 1280 },
-      { label: "Widescreen — 1920×1080", width: 1920, height: 1080 },
-      { label: "Small — 512×512", width: 512, height: 512 },
+      { label: "Landscape — 1280×768",  width: 1280, height: 768  },
+      { label: "Portrait — 768×1280",   width: 768,  height: 1280 },
+      { label: "Widescreen — 1920×1080",width: 1920, height: 1080 },
+      { label: "Small — 512×512",       width: 512,  height: 512  },
     ],
   },
   "@cf/black-forest-labs/flux-2-klein-9b": {
     supportsSize: true, min: 256, max: 1920,
+    supportsRefImage: true,
+    refImageNote: "Optional: upload up to 4 reference images (≤512×512 each) to guide style/content",
     presets: [
       { label: "Square HD — 1024×1024", width: 1024, height: 1024 },
-      { label: "Landscape — 1280×768", width: 1280, height: 768 },
-      { label: "Portrait — 768×1280", width: 768, height: 1280 },
-      { label: "Widescreen — 1920×1080", width: 1920, height: 1080 },
-      { label: "Small — 512×512", width: 512, height: 512 },
+      { label: "Landscape — 1280×768",  width: 1280, height: 768  },
+      { label: "Portrait — 768×1280",   width: 768,  height: 1280 },
+      { label: "Widescreen — 1920×1080",width: 1920, height: 1080 },
+      { label: "Small — 512×512",       width: 512,  height: 512  },
     ],
   },
   "@cf/black-forest-labs/flux-2-dev": {
     supportsSize: true, min: 256, max: 1920,
+    supportsRefImage: true,
+    refImageNote: "Optional: upload up to 4 reference images (≤512×512 each) to guide style/content",
     presets: [
-      { label: "Default — 1024×768", width: 1024, height: 768 },
+      { label: "Default — 1024×768",    width: 1024, height: 768  },
       { label: "Square HD — 1024×1024", width: 1024, height: 1024 },
-      { label: "Landscape — 1280×768", width: 1280, height: 768 },
-      { label: "Portrait — 768×1280", width: 768, height: 1280 },
-      { label: "Widescreen — 1920×1080", width: 1920, height: 1080 },
+      { label: "Landscape — 1280×768",  width: 1280, height: 768  },
+      { label: "Portrait — 768×1280",   width: 768,  height: 1280 },
+      { label: "Widescreen — 1920×1080",width: 1920, height: 1080 },
     ],
   },
   "@cf/stabilityai/stable-diffusion-xl-base-1.0": {
     supportsSize: true, min: 256, max: 2048,
     presets: [
-      { label: "Native — 1024×1024", width: 1024, height: 1024 },
-      { label: "Landscape — 1280×768", width: 1280, height: 768 },
-      { label: "Portrait — 768×1280", width: 768, height: 1280 },
-      { label: "Large — 2048×2048", width: 2048, height: 2048 },
-      { label: "Small — 512×512", width: 512, height: 512 },
+      { label: "Native — 1024×1024",    width: 1024, height: 1024 },
+      { label: "Landscape — 1280×768",  width: 1280, height: 768  },
+      { label: "Portrait — 768×1280",   width: 768,  height: 1280 },
+      { label: "Large — 2048×2048",     width: 2048, height: 2048 },
+      { label: "Small — 512×512",       width: 512,  height: 512  },
     ],
   },
   "@cf/bytedance/stable-diffusion-xl-lightning": {
     supportsSize: true, min: 256, max: 2048,
     presets: [
-      { label: "Native — 1024×1024", width: 1024, height: 1024 },
-      { label: "Landscape — 1280×720", width: 1280, height: 720 },
-      { label: "Portrait — 720×1280", width: 720, height: 1280 },
-      { label: "Large — 2048×2048", width: 2048, height: 2048 },
-      { label: "Small — 512×512", width: 512, height: 512 },
+      { label: "Native — 1024×1024",    width: 1024, height: 1024 },
+      { label: "Landscape — 1280×720",  width: 1280, height: 720  },
+      { label: "Portrait — 720×1280",   width: 720,  height: 1280 },
+      { label: "Large — 2048×2048",     width: 2048, height: 2048 },
+      { label: "Small — 512×512",       width: 512,  height: 512  },
     ],
   },
   "@cf/runwayml/stable-diffusion-v1-5-img2img": {
     supportsSize: true, min: 256, max: 768,
     note: "SD v1.5 performs best at 512×512 or 768×768",
+    requiresImage: true,
+    imageLabel: "Input Image (required)",
+    imageNote: "The model will transform this image guided by your prompt",
     presets: [
-      { label: "Standard — 512×512", width: 512, height: 512 },
-      { label: "Portrait — 512×768", width: 512, height: 768 },
-      { label: "Landscape — 768×512", width: 768, height: 512 },
-      { label: "Large — 768×768", width: 768, height: 768 },
+      { label: "Standard — 512×512",    width: 512,  height: 512  },
+      { label: "Portrait — 512×768",    width: 512,  height: 768  },
+      { label: "Landscape — 768×512",   width: 768,  height: 512  },
+      { label: "Large — 768×768",       width: 768,  height: 768  },
     ],
   },
   "@cf/runwayml/stable-diffusion-v1-5-inpainting": {
     supportsSize: true, min: 256, max: 768,
     note: "SD v1.5 performs best at 512×512 or 768×768",
+    requiresImage: true,
+    requiresMask: true,
+    imageLabel: "Input Image (required)",
+    imageNote: "The source image to inpaint",
+    maskLabel: "Mask Image (required)",
+    maskNote: "White areas will be repainted, black areas are preserved",
     presets: [
-      { label: "Standard — 512×512", width: 512, height: 512 },
-      { label: "Portrait — 512×768", width: 512, height: 768 },
-      { label: "Landscape — 768×512", width: 768, height: 512 },
-      { label: "Large — 768×768", width: 768, height: 768 },
+      { label: "Standard — 512×512",    width: 512,  height: 512  },
+      { label: "Portrait — 512×768",    width: 512,  height: 768  },
+      { label: "Landscape — 768×512",   width: 768,  height: 512  },
+      { label: "Large — 768×768",       width: 768,  height: 768  },
     ],
   },
-  "@cf/leonardo-ai/phoenix-1.0": {
+  // Corrected namespace: @cf/leonardo/ not @cf/leonardo-ai/
+  "@cf/leonardo/phoenix-1.0": {
     supportsSize: true, min: 256, max: 1920,
     presets: [
       { label: "Square HD — 1024×1024", width: 1024, height: 1024 },
-      { label: "Landscape — 1280×768", width: 1280, height: 768 },
-      { label: "Portrait — 768×1280", width: 768, height: 1280 },
-      { label: "Widescreen — 1920×1080", width: 1920, height: 1080 },
+      { label: "Landscape — 1280×768",  width: 1280, height: 768  },
+      { label: "Portrait — 768×1280",   width: 768,  height: 1280 },
+      { label: "Widescreen — 1920×1080",width: 1920, height: 1080 },
     ],
   },
-  "@cf/leonardo-ai/lucid-origin": {
+  "@cf/leonardo/lucid-origin": {
     supportsSize: true, min: 256, max: 1920,
     presets: [
       { label: "Square HD — 1024×1024", width: 1024, height: 1024 },
-      { label: "Landscape — 1280×768", width: 1280, height: 768 },
-      { label: "Portrait — 768×1280", width: 768, height: 1280 },
-      { label: "Widescreen — 1920×1080", width: 1920, height: 1080 },
+      { label: "Landscape — 1280×768",  width: 1280, height: 768  },
+      { label: "Portrait — 768×1280",   width: 768,  height: 1280 },
+      { label: "Widescreen — 1920×1080",width: 1920, height: 1080 },
     ],
   },
 };
@@ -100,29 +116,68 @@ const IMAGE_MODELS = [
   {
     group: "FLUX (Black Forest Labs)",
     models: [
-      { label: "FLUX.1 Schnell — 12B, fast", value: "@cf/black-forest-labs/flux-1-schnell" },
-      { label: "FLUX.2 Klein 4B — Fastest/lightest", value: "@cf/black-forest-labs/flux-2-klein-4b" },
+      { label: "FLUX.1 Schnell — 12B, fast",          value: "@cf/black-forest-labs/flux-1-schnell"  },
+      { label: "FLUX.2 Klein 4B — Fastest/lightest",  value: "@cf/black-forest-labs/flux-2-klein-4b" },
       { label: "FLUX.2 Klein 9B — Ultra-fast + editing", value: "@cf/black-forest-labs/flux-2-klein-9b" },
-      { label: "FLUX.2 Dev — High realism", value: "@cf/black-forest-labs/flux-2-dev" },
+      { label: "FLUX.2 Dev — High realism",           value: "@cf/black-forest-labs/flux-2-dev"      },
     ],
   },
   {
     group: "Stable Diffusion (Stability AI / RunwayML)",
     models: [
-      { label: "SDXL Base 1.0 — High quality 1024×1024", value: "@cf/stabilityai/stable-diffusion-xl-base-1.0" },
-      { label: "SDXL Lightning — 2-step generation", value: "@cf/bytedance/stable-diffusion-xl-lightning" },
-      { label: "SD v1.5 img2img", value: "@cf/runwayml/stable-diffusion-v1-5-img2img" },
-      { label: "SD v1.5 Inpainting", value: "@cf/runwayml/stable-diffusion-v1-5-inpainting" },
+      { label: "SDXL Base 1.0 — High quality 1024×1024", value: "@cf/stabilityai/stable-diffusion-xl-base-1.0"        },
+      { label: "SDXL Lightning — 2-step generation",     value: "@cf/bytedance/stable-diffusion-xl-lightning"          },
+      { label: "SD v1.5 img2img — image-to-image",       value: "@cf/runwayml/stable-diffusion-v1-5-img2img"           },
+      { label: "SD v1.5 Inpainting — image + mask",      value: "@cf/runwayml/stable-diffusion-v1-5-inpainting"        },
     ],
   },
   {
     group: "Leonardo AI (Partner)",
     models: [
-      { label: "Leonardo Phoenix 1.0", value: "@cf/leonardo-ai/phoenix-1.0" },
-      { label: "Leonardo Lucid Origin", value: "@cf/leonardo-ai/lucid-origin" },
+      { label: "Leonardo Phoenix 1.0",  value: "@cf/leonardo/phoenix-1.0"  },
+      { label: "Leonardo Lucid Origin", value: "@cf/leonardo/lucid-origin" },
     ],
   },
 ];
+
+// Read a File → base64 string (no data-URI prefix)
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.readAsDataURL(file);
+  });
+}
+
+// Small image-drop zone component
+function ImageUpload({ label, note, required, file, preview, onChange, onClear, accept = "image/*" }) {
+  const inputRef = useRef(null);
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center gap-2">
+        <label className="text-xs font-semibold text-gray-400 uppercase tracking-widest">{label}</label>
+        {required && <span className="text-xs text-red-500 font-bold">required</span>}
+      </div>
+      {note && <p className="text-xs text-gray-600">{note}</p>}
+      {preview ? (
+        <div className="relative w-fit">
+          <img src={preview} alt="preview" className="h-28 rounded-xl border border-gray-700 object-cover" />
+          <button onClick={onClear}
+            className="absolute -top-2 -right-2 bg-gray-800 border border-gray-600 text-gray-300 hover:text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+            ✕
+          </button>
+        </div>
+      ) : (
+        <button onClick={() => inputRef.current?.click()}
+          className="flex items-center gap-2 bg-gray-900 border border-dashed border-gray-600 hover:border-indigo-500 text-gray-500 hover:text-gray-300 rounded-xl px-4 py-3 text-sm transition w-fit">
+          <span>📁</span> Choose image…
+        </button>
+      )}
+      <input ref={inputRef} type="file" accept={accept} className="hidden" onChange={onChange} />
+    </div>
+  );
+}
 
 export default function AIPromptPage() {
   const [mode, setMode] = useState("text");
@@ -132,6 +187,13 @@ export default function AIPromptPage() {
   const [selectedPreset, setSelectedPreset] = useState(0);
   const [customWidth, setCustomWidth] = useState(1024);
   const [customHeight, setCustomHeight] = useState(1024);
+
+  // Image inputs for img2img / inpainting
+  const [inputImageFile, setInputImageFile] = useState(null);
+  const [inputImagePreview, setInputImagePreview] = useState(null);
+  const [inputMaskFile, setInputMaskFile] = useState(null);
+  const [inputMaskPreview, setInputMaskPreview] = useState(null);
+
   const [response, setResponse] = useState("");
   const [imageDataUri, setImageDataUri] = useState(null);
   const [error, setError] = useState(null);
@@ -149,10 +211,43 @@ export default function AIPromptPage() {
     setSelectedModel(val);
     setSelectedPreset(0);
     setSizeMode("preset");
+    // Clear image inputs when switching models
+    setInputImageFile(null);
+    setInputImagePreview(null);
+    setInputMaskFile(null);
+    setInputMaskPreview(null);
+    setError(null);
+  };
+
+  const handleImageFileChange = async (e, type) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const preview = URL.createObjectURL(file);
+    if (type === "image") {
+      setInputImageFile(file);
+      setInputImagePreview(preview);
+    } else {
+      setInputMaskFile(file);
+      setInputMaskPreview(preview);
+    }
+    e.target.value = "";
   };
 
   const handleSend = async () => {
     if (!prompt.trim() || loading) return;
+
+    // Validate required image inputs
+    if (mode === "image") {
+      if (sizeConfig?.requiresImage && !inputImageFile) {
+        setError("This model requires an input image. Please upload one.");
+        return;
+      }
+      if (sizeConfig?.requiresMask && !inputMaskFile) {
+        setError("This model requires both an image and a mask. Please upload both.");
+        return;
+      }
+    }
+
     setLoading(true);
     setResponse("");
     setImageDataUri(null);
@@ -160,10 +255,17 @@ export default function AIPromptPage() {
 
     try {
       const size = getSelectedSize();
-      const body =
-        mode === "image"
-          ? { prompt, mode: "image", model: selectedModel, ...(size ? { width: size.width, height: size.height } : {}) }
-          : { prompt, mode: "text" };
+
+      let body;
+      if (mode === "image") {
+        body = { prompt, mode: "image", model: selectedModel, ...(size ? { width: size.width, height: size.height } : {}) };
+
+        // Attach base64 image / mask for SD v1.5 models
+        if (inputImageFile) body.image = await fileToBase64(inputImageFile);
+        if (inputMaskFile)  body.mask  = await fileToBase64(inputMaskFile);
+      } else {
+        body = { prompt, mode: "text" };
+      }
 
       const res = await fetch("/api/generate-image", {
         method: "POST",
@@ -179,12 +281,10 @@ export default function AIPromptPage() {
       }
 
       if (mode === "image") {
-        // Worker returns { image: "<base64>" } for all image models
         if (!data.image) {
           setError("No image data returned from the model.");
           return;
         }
-        // Detect format: FLUX.1 schnell returns JPEG, others PNG
         const isJpeg = selectedModel === "@cf/black-forest-labs/flux-1-schnell";
         const mimeType = isJpeg ? "image/jpeg" : "image/png";
         setImageDataUri(`data:${mimeType};base64,${data.image}`);
@@ -249,6 +349,7 @@ export default function AIPromptPage() {
         {/* Image Mode Controls */}
         {mode === "image" && (
           <div className="flex flex-col gap-5 fade-up">
+
             {/* Model Select */}
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Image Model</label>
@@ -262,6 +363,51 @@ export default function AIPromptPage() {
               </select>
               <p className="text-xs text-gray-600 font-mono">{selectedModel}</p>
             </div>
+
+            {/* ── Required image upload (img2img) ── */}
+            {sizeConfig?.requiresImage && (
+              <div className="flex flex-col gap-4 bg-gray-900/60 border border-gray-700 rounded-2xl p-4">
+                <ImageUpload
+                  label={sizeConfig.imageLabel}
+                  note={sizeConfig.imageNote}
+                  required
+                  file={inputImageFile}
+                  preview={inputImagePreview}
+                  onChange={(e) => handleImageFileChange(e, "image")}
+                  onClear={() => { setInputImageFile(null); setInputImagePreview(null); }}
+                />
+                {sizeConfig?.requiresMask && (
+                  <ImageUpload
+                    label={sizeConfig.maskLabel}
+                    note={sizeConfig.maskNote}
+                    required
+                    file={inputMaskFile}
+                    preview={inputMaskPreview}
+                    onChange={(e) => handleImageFileChange(e, "mask")}
+                    onClear={() => { setInputMaskFile(null); setInputMaskPreview(null); }}
+                  />
+                )}
+              </div>
+            )}
+
+            {/* ── Optional reference images (FLUX Klein / Dev) ── */}
+            {sizeConfig?.supportsRefImage && (
+              <div className="flex flex-col gap-2 bg-indigo-950/20 border border-indigo-900/40 rounded-2xl p-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-indigo-400 text-sm">🖼</span>
+                  <p className="text-xs font-semibold text-indigo-400 uppercase tracking-widest">Reference Images (optional)</p>
+                </div>
+                <p className="text-xs text-gray-500">{sizeConfig.refImageNote}</p>
+                <ImageUpload
+                  label="Reference Image"
+                  required={false}
+                  file={inputImageFile}
+                  preview={inputImagePreview}
+                  onChange={(e) => handleImageFileChange(e, "image")}
+                  onClear={() => { setInputImageFile(null); setInputImagePreview(null); }}
+                />
+              </div>
+            )}
 
             {/* Size Section */}
             <div className="flex flex-col gap-3">
