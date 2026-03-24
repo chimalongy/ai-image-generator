@@ -1,0 +1,10 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "image-gen-worker",
+	"main": "src/index.js",
+	"compatibility_date": "2026-03-10",
+	"account_id": "0b8e3edf84db5076dca03fc5eccdb12e",
+	"compatibility_flags": ["nodejs_compat"],
+	"observability": { "enabled": true },
+	"ai": { "binding": "AI" }
+  }
