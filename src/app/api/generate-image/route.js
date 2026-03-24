@@ -4,7 +4,7 @@ const WORKER_URL = "https://image-gen-worker.geniusdomainnames.workers.dev/ask";
 
 export async function POST(request) {
   try {
-    const { prompt } = await request.json();
+    const { prompt, mode = "text", model, width, height } = await request.json();
 
     if (!prompt || !prompt.trim()) {
       return NextResponse.json({ error: "Missing 'prompt' field" }, { status: 400 });
@@ -13,18 +13,20 @@ export async function POST(request) {
     const workerRes = await fetch(WORKER_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt }),
+      body: JSON.stringify({ prompt, mode, model, width, height }),
     });
 
+    // Always parse JSON — worker now returns { image: "<base64>" } for images
+    // and { response: "..." } for text. Errors also come back as JSON.
+    const data = await workerRes.json();
+
     if (!workerRes.ok) {
-      const errorText = await workerRes.text();
       return NextResponse.json(
-        { error: `Worker error: ${errorText}` },
+        { error: data.error || "Worker error" },
         { status: workerRes.status }
       );
     }
 
-    const data = await workerRes.json();
     return NextResponse.json(data);
   } catch (err) {
     console.error("[generate-image] Error:", err);
